@@ -100,38 +100,151 @@ void command(std::wstring cmd){
  else if(cmd==L"MYSTERY")setOutput(L"MYSTERY ENGINE: create a hypothesis; measure, test, verify. Research workflow pending.");
  else setOutput(L"UNKNOWN COMMAND. Type HELP.");
 }
+const std::array<std::array<const wchar_t*,6>,12> controls{{
+ {L"OPEN RESONANCE",L"OPEN GUFF",L"HARDSTOP",L"OPEN RADAR",L"OPEN SIGNAL",L"STATUS"},
+ {L"EXPORT GEOMETRY",L"EXPORT 528 HZ",L"HARDSTOP",L"RINGS -",L"RINGS +",L"STATUS"},
+ {L"STATUS",L"SIGNAL HELP",L"HARDSTOP",L"OPEN RESONANCE",L"OPEN ENTITY",L"STATUS"},
+ {L"CONTACT RULES",L"OPEN ENTITY",L"HARDSTOP",L"OPEN SIGNAL",L"OPEN POLYGLOT",L"STATUS"},
+ {L"EVIDENCE RULES",L"OPEN SIGNAL",L"HARDSTOP",L"OPEN RADAR",L"OPEN GUFF",L"STATUS"},
+ {L"ASTRO STATUS",L"OPEN CHRONOS",L"HARDSTOP",L"OPEN RADAR",L"OPEN GUFF",L"STATUS"},
+ {L"CHRONOS STATUS",L"OPEN SPOON FORK",L"HARDSTOP",L"OPEN GUFF",L"OPEN RADAR",L"STATUS"},
+ {L"SAFETY STATUS",L"OPERATOR RESET",L"HARDSTOP",L"OPEN HOME",L"OPEN SETTINGS",L"STATUS"},
+ {L"GUFF STATUS",L"REPOSITORIES",L"HARDSTOP",L"OPEN RADAR",L"OPEN AUTOMATIONS",L"STATUS"},
+ {L"RADAR STATUS",L"REPOSITORIES",L"HARDSTOP",L"OPEN GUFF",L"OPEN ENTITY",L"STATUS"},
+ {L"AUTOMATION STATUS",L"GUFF STATUS",L"HARDSTOP",L"OPEN SETTINGS",L"OPEN HOME",L"STATUS"},
+ {L"DEVICE STATUS",L"SAFETY STATUS",L"HARDSTOP",L"OPEN GUFF",L"OPEN RESONANCE",L"STATUS"}
+}};
+void changeTab(int tab){selected=std::clamp(tab,0,11);InvalidateRect(window,nullptr,FALSE);}
+void tabAction(int index){
+ if(index==2){safety.engage();setOutput(L"HARDSTOP ENGAGED");return;}
+ if(selected==1) {
+  if(index==0){geometry();return;}if(index==1){tone();return;}
+  if(index==3){rings=std::max(0,rings-1);return;}
+  if(index==4){rings=std::min(5,rings+1);return;}
+ }
+ if(selected==7 && index==1){command(L"RESET");return;}
+ if(index==5){command(L"STATUS");return;}
+ const auto label=std::wstring(controls[selected][index]);
+ if(label.find(L"REPOSITORIES")!=std::wstring::npos){command(L"REPOS");return;}
+ if(label.find(L"GUFF STATUS")!=std::wstring::npos){command(L"GUFF");return;}
+ if(label.find(L"OPEN ")==0){
+  const std::wstring target=label.substr(5);
+  if(target==L"POLYGLOT"){setOutput(L"POLYGLOT module scheduled for GUFF; translation not yet connected");return;}
+  for(int i=0;i<12;++i)if(tabs[i]==target){changeTab(i);return;}
+  if(target==L"SIGNAL")changeTab(2);
+  else if(target==L"AUTOMATIONS")changeTab(10);
+  else if(target==L"RESONANCE")changeTab(1);
+  else if(target==L"ENTITY")changeTab(4);
+  else if(target==L"RADAR")changeTab(9);
+  else if(target==L"CHRONOS")changeTab(6);
+  else if(target==L"SPOON FORK")changeTab(5);
+  else if(target==L"SETTINGS")changeTab(11);
+  else if(target==L"GUFF")changeTab(8);
+  else if(target==L"HOME")changeTab(0);
+  return;
+ }
+ setOutput(label+L" / MODULE NOT CONNECTED. No fabricated data.");
+}
+void moduleCard(HDC dc,RECT r,const std::wstring& heading,const std::wstring& value,const std::wstring& foot){
+ rect(dc,r,RGB(14,48,60));frame(dc,r,RGB(40,95,105));
+ text(dc,r.left+15,r.top+12,heading,muted,13,true);
+ text(dc,r.left+15,r.top+40,value,ink,20,true);
+ text(dc,r.left+15,r.top+76,foot,RGB(89,202,191),12);
+}
+void waveform(HDC dc,int left,int top,int width,int height){
+ line(dc,left,top+height/2,left+width,top+height/2,RGB(35,88,100));
+ for(int x=0;x<width-1;++x){
+  double a=std::sin((x+phase*5)*0.075);
+  double b=std::sin((x+1+phase*5)*0.075);
+  line(dc,left+x,top+height/2-(int)(height*.38*a),left+x+1,top+height/2-(int)(height*.38*b),cyan,2);
+ }
+}
+void paintWorkspace(HDC dc,RECT r){
+ const int w=r.right-r.left,h=r.bottom-r.top,cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;
+ text(dc,r.left+19,r.top+15,tabs[selected]+L"  /  INSTRUMENT "+std::to_wstring(selected+1),cyan,14,true);
+ switch(selected){
+ case 0:
+  moduleCard(dc,{r.left+17,r.top+62,r.left+w/2-6,r.top+174},L"GUFF INTELLIGENCE",L"ADAPTER PENDING",L"21 repositories registered");
+  moduleCard(dc,{r.left+w/2+6,r.top+62,r.right-17,r.top+174},L"SAFETY AUTHORITY",safety.engaged()?L"STOPPED":L"READY",L"Offline controls operational");
+  moduleCard(dc,{r.left+17,r.top+195,r.left+w/2-6,r.top+307},L"GEOMETRY ENGINE",L"GENERATIVE",L"Export functional SVG");
+  moduleCard(dc,{r.left+w/2+6,r.top+195,r.right-17,r.top+307},L"SIGNAL INSTRUMENT",L"NOT CONNECTED",L"No synthetic receiver readings");
+  break;
+ case 1:{
+  text(dc,r.left+17,r.top+43,L"SACRED GEOMETRY / PARAMETRIC",muted,13);
+  int radius=std::max(11,std::min({w/11,h/8,43}));
+  for(int q=-rings;q<=rings;++q)for(int z=-rings;z<=rings;++z){
+    if(std::max({std::abs(q),std::abs(z),std::abs(q+z)})>rings)continue;
+    int px=cx+(int)((q+z*.5)*radius*1.5),py=cy+(int)(z*std::sqrt(3.0)*radius*.76);
+    disk(dc,px,py,radius,((q+z+phase)%3==0)?cyan:RGB(43,133,146));
+  }
+  disk(dc,cx,cy,6,ink);
+  text(dc,r.left+17,r.bottom-54,L"RINGS: "+std::to_wstring(rings)+L"    SINE: 528 Hz    GAIN: 0.10",ink,15,true);
+  text(dc,r.left+17,r.bottom-29,L"Mathematical synthesis / exports only, not live sensor acquisition",muted,12);
+  break;
+ }
+ case 2:
+  text(dc,r.left+20,r.top+50,L"PRISM SPECTRAL INSTRUMENT / NO DEVICE CONNECTED",RGB(255,191,140),15,true);
+  for(int i=1;i<=6;++i)line(dc,r.left+20,r.top+90+i*35,r.right-20,r.top+90+i*35,RGB(27,69,82));
+  text(dc,r.left+22,r.bottom-62,L"RX: unavailable     TX: no transmission     CALIBRATION: pending",ink,14);
+  text(dc,r.left+22,r.bottom-33,L"FFT and WASAPI integration required before plotting real signal data.",muted,12);break;
+ case 3:
+  text(dc,r.left+20,r.top+52,L"SÉANCE / EXTRATERRESTRIAL CONTACT RESEARCH",ink,19,true);
+  moduleCard(dc,{r.left+18,r.top+107,r.right-18,r.top+222},L"RECEIVER ORIGIN",L"UNRESOLVED",L"No live hardware; no generated contact messages");
+  text(dc,r.left+20,r.bottom-64,L"EXPERIMENT: not started  /  PROVENANCE: required",muted,14);break;
+ case 4:
+  moduleCard(dc,{r.left+18,r.top+74,r.right-18,r.top+183},L"ENTITY / HYPOTHESIS REGISTER",L"0 VERIFIED ENTRIES",L"Source identity cannot be inferred from unexplained signals");
+  text(dc,r.left+22,r.top+221,L"EVIDENCE TYPES  /  MEASURED | DERIVED | INTERPRETED | SYNTHESIZED",muted,13);break;
+ case 5:
+  text(dc,r.left+20,r.top+54,L"SPOON FORK  /  CELESTIAL + GEOGRAPHIC",ink,19,true);
+  disk(dc,cx,cy,115,RGB(55,131,149));disk(dc,cx,cy,74,RGB(85,186,180));disk(dc,cx,cy,25,cyan);
+  line(dc,cx-140,cy,cx+140,cy,RGB(52,98,117));
+  text(dc,r.left+20,r.bottom-42,L"Ephemeris and astrocartography databases: not installed",muted,13);break;
+ case 6:
+  text(dc,r.left+20,r.top+57,L"CHRONOS  /  TEMPORAL RESEARCH",ink,19,true);
+  for(int rad=50;rad<=135;rad+=28)disk(dc,cx,cy,rad,RGB(54,120,137));
+  line(dc,cx,cy,cx+72,cy-70,cyan,3);line(dc,cx,cy,cx-20,cy-96,ink,2);
+  text(dc,r.left+20,r.bottom-39,L"Future-self continuity: planning protocol; no time-message receiver",muted,13);break;
+ case 7:
+  text(dc,r.left+20,r.top+55,L"DRIFT ANCHOR / SAFETY CONTROLLER",ink,19,true);
+  moduleCard(dc,{r.left+18,r.top+105,r.right-18,r.top+236},L"GLOBAL OPERATOR GATE",safety.engaged()?L"HARDSTOP ENGAGED":L"LOCAL SAFETY READY",L"Real hardware emission and acquisition not implemented");
+  text(dc,r.left+20,r.bottom-42,L"Use HARDSTOP at any time; reset requires deliberate approval",muted,14);break;
+ case 8:
+  text(dc,r.left+20,r.top+55,L"GOLF-GUFF / LOCAL GENERATIVE INTELLIGENCE",ink,18,true);
+  moduleCard(dc,{r.left+18,r.top+108,r.right-18,r.top+229},L"MODEL BRIDGE",L"NOT CONNECTED",L"Prompt assembly exists; inference is not simulated");
+  text(dc,r.left+20,r.bottom-40,L"Repository registry: 21 discovered  |  source index: pending",muted,13);break;
+ case 9:
+  text(dc,r.left+20,r.top+54,L"RADAR / RESEARCH DISCOVERY + DATA FARM",ink,18,true);
+  moduleCard(dc,{r.left+18,r.top+100,r.right-18,r.top+222},L"NETWORK CONNECTOR",L"OFFLINE / INACTIVE",L"No article content fetched in this build");
+  text(dc,r.left+20,r.bottom-44,L"Future sources: research feeds, astronomy and academic publications",muted,13);break;
+ case 10:
+  text(dc,r.left+20,r.top+56,L"AUTOMATIONS / SYSTEM EVOLUTION",ink,18,true);
+  moduleCard(dc,{r.left+18,r.top+107,r.right-18,r.top+221},L"JOB QUEUE",L"NO JOBS ACTIVE",L"Scheduling and protected repair approval pending");
+  text(dc,r.left+20,r.bottom-45,L"Build-and-test CI is active on GitHub; no local automation daemon",muted,13);break;
+ case 11:
+  text(dc,r.left+20,r.top+52,L"SETTINGS / SYSTEM BOUNDARIES",ink,18,true);
+  moduleCard(dc,{r.left+18,r.top+101,r.right-18,r.top+214},L"RUNTIME MODE",L"OFFLINE-FIRST",L"C++20 / Windows x64 / local control");
+  text(dc,r.left+20,r.bottom-44,L"External transmitters: disabled  |  AI model: unavailable",muted,13);break;
+ }
+}
 void paint(HDC dc,int w,int h){
  rect(dc,{0,0,w,h},RGB(7,18,28));
  rect(dc,{0,0,w,58},RGB(12,33,46));line(dc,0,57,w,57,RGB(35,86,97));
- text(dc,22,13,L"⬡  AETHER OS",RGB(196,255,246),27,true);
+ text(dc,22,13,L"AETHER OS",RGB(196,255,246),27,true);
  text(dc,244,20,L"AN APP FOR THE FUTURE  /  SPIRAL OS",muted,15);
- text(dc,w-210,20,L"●  LOCAL MAINFRAME",cyan,14,true);
+ text(dc,w-210,20,L"LOCAL MAINFRAME",cyan,14,true);
  rect(dc,{0,58,226,h},RGB(10,28,40));
  text(dc,20,79,L"WORKSPACES  /  12",RGB(91,159,174),13,true);
  for(int i=0;i<12;++i){
-  RECT r{12,110+i*36,214,143+i*36};
-  if(r.bottom>h-10)break;
-  if(i==selected){rect(dc,r,RGB(22,73,80));rect(dc,{12,r.top,16,r.bottom},cyan);}
-  text(dc,26,r.top+7,(i<9?L"0":L"")+std::to_wstring(i+1)+L"    "+tabs[i],i==selected?ink:muted,14,i==selected);
+  RECT rr{12,110+i*36,214,143+i*36};if(rr.bottom>h-10)break;
+  if(i==selected){rect(dc,rr,RGB(22,73,80));rect(dc,{12,rr.top,16,rr.bottom},cyan);}
+  text(dc,26,rr.top+7,(i<9?L"0":L"")+std::to_wstring(i+1)+L"    "+tabs[i],i==selected?ink:muted,14,i==selected);
  }
- const int cx=std::max(400,(w+235)/2), cy=std::max(235,(h-128)/2);
  text(dc,250,82,tabs[selected],ink,29,true);
- text(dc,251,124,desc[selected],muted,15);
+ text(dc,251,124,desc[selected],muted,14);
  RECT panel{245,165,w-23,std::max(330,h-192)};
  rect(dc,panel,RGB(9,32,44));frame(dc,panel,RGB(32,87,99));
- text(dc,265,182,L"SACRED GEOMETRY  /  PARAMETRIC HEXAGONAL FIELD",RGB(102,217,209),13,true);
- int radius=std::min({(w-310)/7,(h-370)/5,55});radius=std::max(12,radius);
- int shift=animate?phase:0;
- for(int q=-rings;q<=rings;++q)for(int r=-rings;r<=rings;++r){
-  if(std::max({std::abs(q),std::abs(r),std::abs(q+r)})>rings)continue;
-  int px=cx+(int)((q+r*0.5)*radius*1.5);
-  int py=cy+(int)(r*std::sqrt(3.0)*radius*0.76);
-  disk(dc,px,py,radius,((q+r+shift)%3==0)?cyan:RGB(43,133,146));
- }
- disk(dc,cx,cy,6,ink);
- text(dc,267,panel.bottom-43,L"GENERATIVE MATHEMATICS  /  NOT A SENSOR READING",muted,12);
- const std::array<std::wstring,6> labels={L"EXPORT GEOMETRY",L"EXPORT 528 HZ",L"HARDSTOP",L"RINGS -",L"RINGS +",L"RUN STATUS"};
- for(int i=0;i<6;++i)button(dc,buttonRect(i,w,h),labels[i],i==2&&safety.engaged());
+ paintWorkspace(dc,panel);
+ for(int i=0;i<6;++i)button(dc,buttonRect(i,w,h),controls[selected][i],i==2&&safety.engaged());
  text(dc,250,h-76,L"TERMINAL  >",cyan,14,true);
  RECT terminal{348,h-81,w-22,h-47};frame(dc,terminal,RGB(41,108,117));
  text(dc,250,h-35,output,safety.engaged()?RGB(255,175,133):muted,13);
@@ -153,10 +266,7 @@ LRESULT CALLBACK proc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
   if(x>=12&&x<224&&y>=110&&y<110+36*12){selected=std::clamp((y-110)/36,0,11);InvalidateRect(hwnd,nullptr,FALSE);return 0;}
   for(int i=0;i<6;++i){auto b=buttonRect(i,r.right,r.bottom);
    if(x<b.left||x>b.right||y<b.top||y>b.bottom)continue;
-   try{switch(i){case 0:geometry();break;case 1:tone();break;
-    case 2:safety.engage();setOutput(L"HARDSTOP ENGAGED");break;
-    case 3:rings=std::max(0,rings-1);break;case 4:rings=std::min(5,rings+1);break;
-    case 5:command(L"STATUS");break;}}catch(...){setOutput(L"ERROR: operation failed safely");}
+   try{tabAction(i);}catch(...){setOutput(L"ERROR: operation failed safely");}
    InvalidateRect(hwnd,nullptr,FALSE);return 0;
   }
   break;
