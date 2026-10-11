@@ -144,7 +144,7 @@ LRESULT CALLBACK proc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
   SendMessageW(input,WM_SETFONT,(WPARAM)font,TRUE);
   SetTimer(hwnd,1,180,nullptr);return 0;
  }
- case WM_SIZE:{RECT r{};GetClientRect(hwnd,&r);MoveWindow(input,357,r.bottom-77,std::max(120,r.right-390),25,TRUE);InvalidateRect(hwnd,nullptr,FALSE);return 0;}
+ case WM_SIZE:{RECT r{};GetClientRect(hwnd,&r);MoveWindow(input,357,r.bottom-77,std::max(120,static_cast<int>(r.right)-390),25,TRUE);InvalidateRect(hwnd,nullptr,FALSE);return 0;}
  case WM_TIMER:if(animate){phase=(phase+1)%6;InvalidateRect(hwnd,nullptr,FALSE);}return 0;
  case WM_KEYDOWN:if(wp==VK_RETURN){wchar_t buf[512]{};GetWindowTextW(input,buf,512);SetWindowTextW(input,L"");command(buf);return 0;}break;
  case WM_COMMAND:if(LOWORD(wp)==kEdit && HIWORD(wp)==EN_CHANGE)return 0;break;
@@ -163,7 +163,7 @@ LRESULT CALLBACK proc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
  }
  case WM_PAINT:{
   PAINTSTRUCT ps{};HDC dc=BeginPaint(hwnd,&ps);RECT r{};GetClientRect(hwnd,&r);
-  HDC mem=CreateCompatibleDC(dc);HBITMAP bitmap=CreateCompatibleBitmap(dc,std::max(1,r.right),std::max(1,r.bottom));
+  HDC mem=CreateCompatibleDC(dc);HBITMAP bitmap=CreateCompatibleBitmap(dc,std::max(1,static_cast<int>(r.right)),std::max(1,static_cast<int>(r.bottom)));
   auto old=SelectObject(mem,bitmap);paint(mem,r.right,r.bottom);
   BitBlt(dc,0,0,r.right,r.bottom,mem,0,0,SRCCOPY);
   SelectObject(mem,old);DeleteObject(bitmap);DeleteDC(mem);EndPaint(hwnd,&ps);return 0;
