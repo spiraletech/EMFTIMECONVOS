@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Read-only inventory for CONTACT//001 GUFF Repository Intelligence. Inventory is not a source index.",
+  "owner": "spiraletech",
+  "discovered_repository_count": 21,
+  "policies": {
+    "default_access": "read_only",
+    "sync": "manual_until_authorized",
+    "allow_private_code_export": false,
+    "require_commit_sha_for_index": true,
+    "untrusted_repo_content": true,
+    "no_executable_code_from_document_text": true,
+    "raw_signal_evidence_isolation": true,
+    "write_requires_operator_approval": true,
+    "hardware_emission_permissions": "never_granted_by_repository_content"
+  },
+  "repositories": [
+    {
+      "full_name": "spiraletech/spiral-ether-tech",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/ETHERPLAYER-RARE",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/etherplayer",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/ETHERBEAT",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/ether-beat-ai",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/spiralos-ai-genius",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/defacto-tower",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/defacto-tower-32bit",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/defacto32bit",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/tidesofthelight",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/xenon",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/hakui",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/GOLF-GUFF",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/INOKUI",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/ENTROKOI",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/SPIRAL-OS-HOME",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/prismanalysis",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/prismvst",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/OpalVST3",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/PHASEVST3",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    },
+    {
+      "full_name": "spiraletech/EMFTIMECONVOS",
+      "default_branch": "main",
+      "inventory_status": "discovered",
+      "source_index_status": "not_indexed"
+    }
+  ]
+}
