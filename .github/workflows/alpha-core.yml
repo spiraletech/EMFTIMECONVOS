@@ -1,0 +1,40 @@
+name: AETHER Windows Program
+on:
+  push:
+    branches: [main, feature/aether-os-alpha-core]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  windows-program:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -A x64
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Package Windows ZIP
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/AETHER-OS | Out-Null
+          Copy-Item build/Release/AetherOS.exe dist/AETHER-OS/AetherOS.exe
+          Copy-Item README.md dist/AETHER-OS/README.md
+          "Launch AetherOS.exe. No console required. GUI alpha with SVG + WAV export." | Set-Content dist/AETHER-OS/START-HERE.txt
+          Compress-Archive -Path dist/AETHER-OS -DestinationPath dist/AETHER-OS-Windows-x64.zip -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AETHER-OS-Windows-x64
+          path: dist/AETHER-OS-Windows-x64.zip
+          if-no-files-found: error
+  linux-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
